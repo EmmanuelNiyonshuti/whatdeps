@@ -1,23 +1,14 @@
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import pytest
 
-
-@pytest.fixture(scope="session")
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture
-def fixtures_dir():
-    """Return path to fixtures directory"""
-    return Path(__file__).parent / "fixtures"
+# @pytest.fixture
+# def fixtures_dir():
+#     return Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
 def sample_pyproject(tmp_path):
-    """Create a sample pyproject.toml with all variants"""
     content = """
 [project]
 name = "test-project"
@@ -26,7 +17,6 @@ dependencies = [
     "click[shell]>=8.0",
     "numpy==1.24.0",
 ]
-
 [dependency-groups]
 test = [
     "pytest>=7.0",
@@ -105,7 +95,6 @@ ruff
 
 @pytest.fixture
 def mock_pypi_response():
-    """Mock PyPI API response for requests package"""
     return {
         "info": {
             "name": "requests",
@@ -138,7 +127,6 @@ def mock_pypi_response():
 
 @pytest.fixture
 def mock_pypi_response_no_github():
-    """Mock PyPI response without GitHub URL"""
     return {
         "info": {
             "name": "simple-package",
@@ -163,7 +151,6 @@ def mock_pypi_response_no_github():
 
 @pytest.fixture
 def mock_pypi_response_no_requires():
-    """Mock PyPI response without requires_python but with classifiers"""
     return {
         "info": {
             "name": "legacy-package",

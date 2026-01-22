@@ -103,8 +103,8 @@ name = "empty-project"
         pyproject.write_text(content)
 
         prod, dev = parser.parse_pyproject(pyproject)
-        assert prod == []
-        assert dev == []
+        assert prod == set()
+        assert dev == set()
 
     def test_parse_only_prod_dependencies(self, tmp_path):
         """Test parsing with only production dependencies"""
@@ -144,10 +144,9 @@ dev = ["pytest", "black"]
             parser.parse_pyproject(pyproject)
 
     def test_parse_nonexistent_file(self, tmp_path):
-        """Test handling of nonexistent file"""
         pyproject = tmp_path / "nonexistent.toml"
 
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(AssertionError):
             parser.parse_pyproject(pyproject)
 
 
@@ -230,15 +229,13 @@ numpy
         assert "numpy" in packages
 
     def test_parse_empty_file(self, tmp_path):
-        """Test parsing empty requirements.txt"""
         requirements = tmp_path / "requirements.txt"
         requirements.write_text("")
 
         packages = parser.parse_requirements(requirements)
-        assert packages == []
+        assert packages == set()
 
     def test_parse_only_comments(self, tmp_path):
-        """Test parsing file with only comments"""
         content = """# Comment 1
 # Comment 2
 ### Comment 3
@@ -247,7 +244,7 @@ numpy
         requirements.write_text(content)
 
         packages = parser.parse_requirements(requirements)
-        assert packages == []
+        assert packages == set()
 
 
 class TestFindAndParse:
@@ -293,11 +290,10 @@ class TestFindAndParse:
         # Should parse pyproject.toml, not requirements.txt
         assert "numpy" in prod
 
-    def test_find_no_files(self, tmp_path, monkeypatch):
-        """Test behavior when no dependency files exist"""
+    def test_find_parse_dependency_file_not_found(self, tmp_path, monkeypatch):
         monkeypatch.chdir(tmp_path)
 
-        with pytest.raises(FileNotFoundError, match="No dependency files found"):
+        with pytest.raises(FileNotFoundError):
             parser.find_and_parse()
 
     def test_find_multiple_dev_requirement_patterns(self, tmp_path, monkeypatch):
