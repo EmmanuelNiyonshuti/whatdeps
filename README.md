@@ -8,6 +8,7 @@
 A small cli tool that shows you informations with your Python dependencies. it checks PyPI for release info and GitHub for activity.
 
 ## Install
+from [PYPI](https://pypi.org/project/whatdeps/)
 ```bash
 pip install whatdeps
 ```
