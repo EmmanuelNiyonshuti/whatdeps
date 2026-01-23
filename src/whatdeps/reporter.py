@@ -9,13 +9,11 @@ from .models import PackageInfo
 
 
 def format_size(size_bytes: int | None) -> str:
-    """Format bytes to human readable format
-
-    Examples:
-        >>> format_size(1024)
-        '1.0KB'
-        >>> format_size(None)
-        'N/A'
+    """
+    >>> format_size(1024)
+    '1.0KB'
+    >>> format_size(None)
+    'N/A'
     """
     if size_bytes is None:
         return "N/A"
@@ -46,7 +44,6 @@ def days_since(date_str: str | None) -> int | None:
 
 
 def create_package_table(packages: list[PackageInfo], title: str) -> Table:
-    """Create a Rich table for a list of packages"""
     table = Table(
         title=title,
         box=box.ROUNDED,
@@ -55,13 +52,13 @@ def create_package_table(packages: list[PackageInfo], title: str) -> Table:
         title_style="bold magenta",
     )
 
-    table.add_column("Package", style="cyan", no_wrap=True, width=20)
-    table.add_column("Python", justify="center", width=10)
-    table.add_column("Size", justify="right", width=10)
-    table.add_column("Last Release", justify="center", width=12)
-    table.add_column("Last Push", justify="center", width=12)
-    table.add_column("Issues (O/C)", justify="center", width=12)
-    table.add_column("Stars", justify="center", width=8)
+    table.add_column("package name", style="cyan", no_wrap=True, width=25)
+    table.add_column("supported python version", justify="center", width=30)
+    table.add_column("Size on Disk", justify="right", width=20)
+    table.add_column("Last Release on PyPi", justify="center", width=25)
+    table.add_column("Last Push on GitHub", justify="center", width=25)
+    table.add_column("Issues (O/C) on GitHub", justify="center", width=25)
+    table.add_column("Stars on GitHub", justify="center", width=20)
 
     section_total_size = 0
 
@@ -125,7 +122,6 @@ def create_package_table(packages: list[PackageInfo], title: str) -> Table:
             else:
                 issues_str = "[dim]0/0[/dim]"
 
-            # Stars
             if gh.stars > 1000:
                 stars_str = f"[bold]{gh.stars:,}[/bold]"
             elif gh.stars > 100:
@@ -164,36 +160,30 @@ def create_package_table(packages: list[PackageInfo], title: str) -> Table:
 
 
 def display_results(packages: list[PackageInfo], console: Console = None) -> None:
-    """Display all package results in rich tables
-
-    Args:
-        packages: List of package information to display
-        console: Optional Rich Console instance (creates new one if not provided)
-    """
     if console is None:
         console = Console()
 
     if not packages:
-        console.print("[yellow]No packages to display[/yellow]")
+        console.print("[yellow]couldn't find any python package to display![/yellow]")
         return
 
-    prod_packages = [p for p in packages if not p.is_dev_dependency]
-    dev_packages = [p for p in packages if p.is_dev_dependency]
+    prod_deps = [p for p in packages if not p.is_dev_dependency]
+    other_deps = [p for p in packages if p.is_dev_dependency]
 
-    if prod_packages:
+    if prod_deps:
         console.print()
-        console.print(create_package_table(prod_packages, "Production Dependencies"))
+        console.print(create_package_table(prod_deps, "Production Dependencies"))
 
-    if dev_packages:
+    if other_deps:
         console.print()
-        console.print(create_package_table(dev_packages, "Development Dependencies"))
+        console.print(create_package_table(other_deps, "Other Dependencies"))
 
-    total_prod_size = sum(p.disk_size or 0 for p in prod_packages)
-    total_dev_size = sum(p.disk_size or 0 for p in dev_packages)
+    total_prod_size = sum(p.disk_size or 0 for p in prod_deps)
+    total_dev_size = sum(p.disk_size or 0 for p in other_deps)
     total_size = total_prod_size + total_dev_size
 
     summary = Panel(
-        f"[bold]Total Packages:[/bold] {len(prod_packages)} production + {len(dev_packages)} development = {len(packages)}\n"
+        f"[bold]Total Packages:[/bold]  {len(packages)}\n"
         f"[bold]Total Disk Usage:[/bold] {format_size(total_size)}\n\n"
         f"[dim]Issues shown as Open/Closed ratio",
         title="Summary",

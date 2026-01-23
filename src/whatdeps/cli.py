@@ -21,32 +21,32 @@ console = Console()
 
 
 async def async_main(args):
-    """Async main entry point"""
-
     with console.status("[bold green]Scanning dependency files...", spinner="dots"):
         if args.file:
             path = Path(args.file)
             if not is_valid_dependency_file(path):
-                raise ValueError(f"Unsupported dependency file: {path.name}")
+                raise ValueError(
+                    f"{path.name} is an invalid python dependency specification file, search PEP(735) to learn more!"
+                )
             if path.name == "pyproject.toml":
-                prod_packages, dev_packages = parser.parse_pyproject(path)
-            else:
-                prod_packages = parser.parse_requirements(path)
-                dev_packages = []
+                prod_deps, other_deps = parser.parse_pyproject(path)
+            elif path.name == "requirements.txt":
+                prod_deps = parser.parse_requirements(path)
+                other_deps = {}
         else:
-            prod_packages, dev_packages = parser.find_and_parse()
+            prod_deps, other_deps = parser.find_and_parse()
 
-    total = len(prod_packages) + len(dev_packages)
+    total = len(prod_deps) + len(other_deps)
     if total == 0:
-        console.print("[yellow]No dependencies found[/yellow]")
+        console.print("[yellow]Couldn't find dependencies[/yellow]")
         return
-    all_packages = [(pkg, False) for pkg in prod_packages] + [
-        (pkg, True) for pkg in dev_packages
+    all_packages = [(pkg, False) for pkg in prod_deps] + [
+        (pkg, True) for pkg in other_deps
     ]
     inspector = PackageInspector()
     console.print(
         f"\n[bold cyan] Inspecting {total} packages[/bold cyan] "
-        f"([green]{len(prod_packages)}[/green] prod, [blue]{len(dev_packages)}[/blue] dev)"
+        f"([green]{len(prod_deps)}[/green] production dependencies, [blue]{len(other_deps)}[/blue] other dependencies)"
     )
 
     with Progress(
@@ -60,22 +60,19 @@ async def async_main(args):
             "[cyan]Fetching metadata from PyPI and GitHub...", total=total
         )
         results = await inspector.inspect_all(all_packages, progress, task)
-
-    # Sort and display results
     results.sort(key=lambda x: (x.is_dev_dependency, x.name.lower()))
     reporter.display_results(results, console)
 
 
 def main():
-    """Main entry point"""
     parser_obj = argparse.ArgumentParser(
-        description="Inspect Python package metadata and health",
+        description="Get to know about your Python project dependency informations from PyPi and GitHub",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser_obj.add_argument(
         "-f",
         "--file",
-        help="Path to pyproject.toml or requirements.txt (auto-detect if not specified)",
+        help="Path to pyproject.toml or requirements.txt (will auto-detect if not specified)",
     )
 
     args = parser_obj.parse_args()
@@ -88,10 +85,10 @@ def main():
         console.print(f"[red]Error:[/red] {e}")
         sys.exit(1)
     except KeyboardInterrupt:
-        console.print("\n[yellow]Interrupted by user[/yellow]")
+        console.print("\n[yellow]Interrupted[/yellow]")
         sys.exit(130)
     except Exception as e:
-        console.print(f"[red]Unexpected error:[/red] {e}", style="bold")
+        console.print(f"[red]Unexpected error Occured:[/red] {e}", style="bold")
 
         traceback.print_exc()
         sys.exit(1)

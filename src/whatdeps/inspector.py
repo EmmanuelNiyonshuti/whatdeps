@@ -10,22 +10,14 @@ from .models import Origin, PackageInfo
 
 
 class PackageInspector:
-    """Inspect package metadata and health using async HTTP
-
-    This class maintains the site-packages path as state and provides
-    a unified interface for all inspection operations.
-    """
-
     PYPI_API = "https://pypi.org/pypi/{}/json"
     GITHUB_API = "https://api.github.com/repos/{}"
 
     def __init__(self):
-        """Initialize inspector and locate site-packages directory"""
         self.venv_site_packages = self._find_site_packages()
 
     @staticmethod
     def _find_site_packages() -> Path | None:
-        """Find site-packages directory if in venv"""
         if sys.prefix == sys.base_prefix:
             return None
 
@@ -35,7 +27,6 @@ class PackageInspector:
         return None
 
     async def _fetch_json(self, client: httpx.AsyncClient, url: str) -> dict | None:
-        """Fetch JSON from URL asynchronously"""
         try:
             response = await client.get(url)
             response.raise_for_status()
@@ -44,7 +35,6 @@ class PackageInspector:
             return None
 
     def _get_github_url(self, pypi_data: dict) -> str | None:
-        """Extract GitHub URL from PyPI metadata"""
         pypi_info = pypi_data.get("info", {})
         home_page_url = pypi_info.get("home_page")
         if home_page_url and "github.com" in home_page_url:
@@ -60,20 +50,18 @@ class PackageInspector:
         return None
 
     def _parse_github_repo_path(self, github_url: str) -> str | None:
-        """Extract owner/repo from GitHub URL"""
+        """get owner/repo from GitHub URL"""
         parts = github_url.rstrip("/").split("github.com/")
         if len(parts) < 2:
             return None
 
         repo_path = parts[1].replace(".git", "").strip("/")
-        # Remove trailing paths like /tree/main or /issues
         repo_path = "/".join(repo_path.split("/")[:2])
         return repo_path
 
     async def _get_github_metadata(
         self, client: httpx.AsyncClient, github_url: str
     ) -> Origin | None:
-        """Get comprehensive GitHub repository health metrics"""
         if not client:
             return None
         repo_path = self._parse_github_repo_path(github_url)
@@ -85,10 +73,10 @@ class PackageInspector:
         if not repo_data:
             return None
 
-        # GitHub API's open_issues_count includes pull requests
+        # GitHub API's open_issues_count including pull requests
         open_issues = repo_data.get("open_issues_count", 0)
 
-        # Fetch closed issues count from search API for accurate ratio
+        # Fetch closed issues count
         issues_search_url = f"https://api.github.com/search/issues?q=repo:{repo_path}+type:issue+state:closed"
         issues_data = await self._fetch_json(client, issues_search_url)
         closed_issues = issues_data.get("total_count", 0) if issues_data else 0
@@ -110,9 +98,9 @@ class PackageInspector:
         )
 
     def _get_python_requires(self, pypi_data: dict) -> str | None:
-        """Extract minimum Python version requirement
-
-        Returns a supported version string like '>=3.8' or '>=3.9,<4.0'
+        """
+        get minimum Python version requirement
+        Returns a supported version string e.g: '>=3.8' or '>=3.9,<4.0'
         """
         pypi_info = pypi_data.get("info", {})
         requires_python = pypi_info.get("requires_python")
@@ -134,7 +122,6 @@ class PackageInspector:
         return None
 
     def _get_last_release_date(self, pypi_data: dict) -> str | None:
-        """Get the last release date from PyPI"""
         releases = pypi_data.get("releases", {})
         if not releases:
             return None
@@ -151,7 +138,6 @@ class PackageInspector:
         return None
 
     def find_file_sizes_in_bytes(self, package_name: str) -> dict[str, int]:
-        """Get total number of bytes for package files in site-packages"""
         if not self.venv_site_packages:
             return {}
 
@@ -179,17 +165,16 @@ class PackageInspector:
     async def inspect(
         self, client: httpx.AsyncClient, package_name: str, is_dev: bool = False
     ) -> PackageInfo:
-        """Inspect a single package"""
         info = PackageInfo(name=package_name, is_dev_dependency=is_dev)
 
         pypi_data = await self._fetch_json(client, self.PYPI_API.format(package_name))
         if not pypi_data:
-            info.error = "Not found on PyPI"
+            info.error = f"I couldn't find {package_name} package on PyPI"
             return info
 
         pypi_info = pypi_data.get("info", {})
         if not pypi_info:
-            info.error = "Invalid PyPI response"
+            info.error = "Response from PyPI is Invalid"
             return info
 
         info.summary = (
@@ -214,21 +199,15 @@ class PackageInspector:
     async def inspect_all(
         self, packages: list[tuple[str, bool]], progress: Progress = None, task_id=None
     ) -> list[PackageInfo]:
-        """Inspect all packages concurrently with optional progress tracking"""
         results = []
-
-        # Create async HTTP client with connection pooling
         async with httpx.AsyncClient(
             headers={"User-Agent": "whatdeps/1.0", "Accept": "application/json"},
             timeout=httpx.Timeout(10.0, connect=5.0),
             limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
         ) as client:
-            # Create tasks for all packages
             tasks = [
                 self.inspect(client, pkg_name, is_dev) for pkg_name, is_dev in packages
             ]
-
-            # Process tasks as they complete
             for coro in asyncio.as_completed(tasks):
                 result = await coro
                 results.append(result)
