@@ -1,11 +1,20 @@
 # whatdeps
 
-<!-- [![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/tests.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions) -->
+[![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/tests.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
 [![codecov](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps/graph/badge.svg?token=6HA3SJLM0F)](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps)
 [![PyPI](https://img.shields.io/pypi/v/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 
-A small cli tool that shows you informations with your Python dependencies. it checks PyPI for release info and GitHub for activity.
+A tiny CLI tool that shows basic information about a Python project’s dependencies using few data from PyPI and GitHub.
+
+## it shows
+
+- **Supported Python versions** - minimum version required
+- **Disk size** - space it takes up
+- **Last release** - when it was last updated on PyPI
+- **Last push** - recent activity on GitHub
+- **Issues** - open/closed ratio (to give a sense of maintenance)
+- **Stars** - popularity on GitHub
 
 ## Install
 from [PYPI](https://pypi.org/project/whatdeps/)
@@ -26,14 +35,6 @@ whatdeps -f requirements.txt
 whatdeps -f pyproject.toml
 ```
 
-## What it shows
-
-- **Supported Python versions** - minimum version required
-- **Disk size** - space it takes up (if installed)
-- **Last release** - when it was last updated on PyPI
-- **Last push** - recent activity on GitHub
-- **Issues** - open/closed ratio (gives you a sense of maintenance)
-- **Stars** - popularity on GitHub
 
 ## Example output
 ```
@@ -63,19 +64,19 @@ whatdeps -f pyproject.toml
 
 ## Supported formats
 
-- `pyproject.toml` (PEP 621, Poetry, Hatch)
-- `requirements.txt`
-- `requirements-dev.txt`
-- Other common requirements file patterns
+- `pyproject.toml` ([PEP 621](https://peps.python.org/pep-0621/), Poetry, Hatch)
+- `requirements.txt` and other common formats (`requirements-dev.txt`, etc.)
+Dependencies are parsed according to [PEP 508](https://peps.python.org/pep-0508/). Development dependencies follow [PEP 735](https://peps.python.org/pep-0735/) groupings.
 
-## Development
+Packages in `requirements.txt` are treated as production dependencies; those from other pip requirements files are considered as other dependencies.
+
+## Development:
 ```bash
 git clone https://github.com/EmmanuelNiyonshuti/whatdeps.git
 cd whatdeps
 pip install -e ".[dev]"
 pytest
 ```
-
 
 ## License
 
