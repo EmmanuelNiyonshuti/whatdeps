@@ -1,11 +1,12 @@
 # whatdeps
-
-[![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/tests.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
+[![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/test.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
 [![codecov](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps/graph/badge.svg?token=6HA3SJLM0F)](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps)
 [![PyPI](https://img.shields.io/pypi/v/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
+[![](https://img.shields.io/github/license/EmmanuelNiyonshuti/whatdeps.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/blob/master/LICENSE.md)
+![t](https://img.shields.io/badge/status-maintained-yellow.svg)
 
-A tiny CLI tool that shows basic information about a Python project’s dependencies using few data from PyPI and GitHub.
+A tiny CLI tool that shows basic information about a Python project’s dependencies using  few pieces of information from PyPI and GitHub.
 
 ## it shows
 
@@ -16,8 +17,8 @@ A tiny CLI tool that shows basic information about a Python project’s dependen
 - **Issues** - open/closed ratio (to give a sense of maintenance)
 - **Stars** - popularity on GitHub
 
-## Install
-from [PYPI](https://pypi.org/project/whatdeps/)
+## Installtion
+to install whatdeps run
 ```bash
 pip install whatdeps
 ```
@@ -28,13 +29,11 @@ Run it in any Python project:
 ```bash
 whatdeps
 ```
-
 Or point it at a specific file:
 ```bash
 whatdeps -f requirements.txt
 whatdeps -f pyproject.toml
 ```
-
 
 ## Example output
 ```
@@ -69,15 +68,3 @@ whatdeps -f pyproject.toml
 Dependencies are parsed according to [PEP 508](https://peps.python.org/pep-0508/). Development dependencies follow [PEP 735](https://peps.python.org/pep-0735/) groupings.
 
 Packages in `requirements.txt` are treated as production dependencies; those from other pip requirements files are considered as other dependencies.
-
-## Development:
-```bash
-git clone https://github.com/EmmanuelNiyonshuti/whatdeps.git
-cd whatdeps
-pip install -e ".[dev]"
-pytest
-```
-
-## License
-
-MIT
