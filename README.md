@@ -18,14 +18,25 @@ A tiny CLI tool that shows basic information about a Python project’s dependen
 - **Stars** - popularity on GitHub
 
 ## Installtion
-to install whatdeps run
+
+You can install it as a commandline tool with pipx or uv tool
+```bash
+uv tool install whatdeps
+
+pipx install whatdeps
+```
+or
+
+You can install it in your project environment with pip or uv
 ```bash
 pip install whatdeps
+
+uv add whatdeps
 ```
 
 ## Usage
 
-Run it in any Python project:
+Run it in any Python project with a dependency specification file:
 ```bash
 whatdeps
 ```
