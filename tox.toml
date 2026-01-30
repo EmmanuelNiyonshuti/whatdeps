@@ -1,0 +1,36 @@
+requires = ["tox>=4.23", "tox-uv>=1.0"]
+env_list = ["3.11", "3.12", "3.13", "3.14"]
+
+[env_run_base]
+description = "Run unit tests with pytest"
+runner = "uv-venv-lock-runner"
+extras = [
+    "dev"
+]
+commands = [
+    ["pytest", "--cov=whatdeps", "--cov-branch", "--cov-report=term-missing", "--cov-report=html", "tests/"]
+]
+
+[env.lint]
+description = "Run code quality checks"
+skip_install = true
+runner = "uv-venv-runner"
+deps = ["ruff>=0.1.0"]
+commands = [["ruff", "check", "src/"]]
+
+[env.format]
+description = "Format code with ruff"
+skip_install = true
+runner = "uv-venv-runner"
+deps = ["ruff>=0.1.0"]
+commands = [["ruff", "format", "src/"]]
+
+[env.coverage]
+description = "Generate coverage report"
+runner = "uv-venv-lock-runner"
+extras = [
+    "dev"
+]
+commands = [
+    ["pytest", "--cov=whatdeps", "--cov-branch", "--cov-report=html", "--cov-report=term-missing", "tests/"]
+]
