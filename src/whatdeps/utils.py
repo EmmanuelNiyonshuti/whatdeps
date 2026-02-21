@@ -1,6 +1,5 @@
 from pathlib import Path
 
-# PEP()
 REQUIREMENTS_FILES = {
     "requirements.txt",
     "requirements-dev.txt",

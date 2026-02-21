@@ -5,7 +5,9 @@ from .utils import REQUIREMENTS_FILES, is_valid_dependency_file
 
 
 def get_package_name(dep_spec: str) -> str:
-    """extract the package name from dependency specification file
+    """Extract the package name from dependency specification file,
+    tries to follow PEP 508 for how package versions are specified,
+    but is lenient and will just try to get the name part of the specifier.
     >>> get_package_name("requests>=2.28.0")
     'requests'
     >>> get_package_name("click[shell]")
