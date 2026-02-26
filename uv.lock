@@ -429,7 +429,7 @@ wheels = [
 
 [[package]]
 name = "whatdeps"
-version = "0.1.0.post1"
+version = "0.1.0.post2"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
