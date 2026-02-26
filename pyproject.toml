@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "whatdeps"
-version = "0.1.0.post1"
+version = "0.1.0.post2"
 description = "CLI tool to inspect Python package informations from PyPI and GitHub."
 readme = "README.md"
 requires-python = ">=3.11"
