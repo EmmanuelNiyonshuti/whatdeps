@@ -20,7 +20,7 @@ from .utils import is_valid_dependency_file
 console = Console()
 
 
-async def async_main(args):
+async def scan_dependencies(args):
     with console.status("[bold green]Scanning dependency files...", spinner="dots"):
         if args.file:
             path = Path(args.file)
@@ -77,7 +77,7 @@ def main():
 
     args = parser_obj.parse_args()
     try:
-        asyncio.run(async_main(args))
+        asyncio.run(scan_dependencies(args))
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] {e}", style="bold")
         sys.exit(1)

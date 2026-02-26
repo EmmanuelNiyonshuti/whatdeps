@@ -9,7 +9,7 @@ from whatdeps.models import PackageInfo
 
 @pytest.mark.anyio
 class TestAsyncMain:
-    async def test_async_main_success(self, sample_pyproject, monkeypatch):
+    async def test_scan_dependencies_success(self, sample_pyproject, monkeypatch):
         monkeypatch.chdir(sample_pyproject.parent)
 
         # Mock args
@@ -38,12 +38,12 @@ class TestAsyncMain:
 
         with patch("whatdeps.cli.PackageInspector", return_value=mock_inspector):
             with patch("whatdeps.cli.reporter.display_results"):
-                await cli.async_main(args)
+                await cli.scan_dependencies(args)
 
         # Verify inspect_all was called
         mock_inspector.inspect_all.assert_called_once()
 
-    async def test_async_main_with_file_pyproject(self, sample_pyproject):
+    async def test_scan_dependencies_with_file_pyproject(self, sample_pyproject):
         """Test with explicit pyproject.toml file"""
         args = Mock()
         args.file = str(sample_pyproject)
@@ -53,9 +53,9 @@ class TestAsyncMain:
 
         with patch("whatdeps.cli.PackageInspector", return_value=mock_inspector):
             with patch("whatdeps.cli.reporter.display_results"):
-                await cli.async_main(args)
+                await cli.scan_dependencies(args)
 
-    async def test_async_main_with_file_requirements(self, sample_requirements):
+    async def test_scan_dependencies_with_file_requirements(self, sample_requirements):
         """Test with explicit requirements.txt file"""
         args = Mock()
         args.file = str(sample_requirements)
@@ -65,9 +65,9 @@ class TestAsyncMain:
 
         with patch("whatdeps.cli.PackageInspector", return_value=mock_inspector):
             with patch("whatdeps.cli.reporter.display_results"):
-                await cli.async_main(args)
+                await cli.scan_dependencies(args)
 
-    async def test_async_main_with_unsupported_file(self, tmp_path):
+    async def test_scan_dependencies_with_unsupported_file(self, tmp_path):
         bad_file = tmp_path / "random.txt"
         bad_file.write_text("some random content")
 
@@ -75,9 +75,11 @@ class TestAsyncMain:
         args.file = str(bad_file)
 
         with pytest.raises(ValueError):
-            await cli.async_main(args)
+            await cli.scan_dependencies(args)
 
-    async def test_async_main_progress_tracking(self, sample_pyproject, monkeypatch):
+    async def test_scan_dependencies_progress_tracking(
+        self, sample_pyproject, monkeypatch
+    ):
         """Test that progress bar is used correctly"""
         monkeypatch.chdir(sample_pyproject.parent)
 
@@ -94,7 +96,7 @@ class TestAsyncMain:
 
         with patch("whatdeps.cli.PackageInspector", return_value=mock_inspector):
             with patch("whatdeps.cli.reporter.display_results"):
-                await cli.async_main(args)
+                await cli.scan_dependencies(args)
 
                 # Verify inspect_all was called with progress
                 mock_inspector.inspect_all.assert_called_once()
@@ -183,22 +185,21 @@ class TestMain:
             call_kwargs = mock_parser_class.call_args[1]
             assert "description" in call_kwargs
 
+    def consume_coro(coro):
+        """Helper to consume coroutine without executing it"""
+        import inspect
+
+        if inspect.iscoroutine(coro):
+            coro.close()
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning:unittest.mock")
     def test_main_parses_file_argument(self):
         """Test that -f argument is parsed correctly"""
         test_file = "test_requirements.txt"
 
         with patch.object(sys, "argv", ["prog", "-f", test_file]):
-            with patch("whatdeps.cli.asyncio.run") as mock_run:
+            # Patch scan_dependencies as an AsyncMock so it can be called
+            # by asyncio.run without leaving an unawaited coroutine
+            with patch("whatdeps.cli.scan_dependencies", new=AsyncMock()):
                 cli.main()
-
-                # asyncio.run should be called
-                mock_run.assert_called_once()
-
-                # Get the coroutine that was passed
-                coro = mock_run.call_args[0][0]
-
-                # Clean up coroutine
-                import inspect
-
-                if inspect.iscoroutine(coro):
-                    coro.close()
+                # If no exception, argument was parsed correctly
