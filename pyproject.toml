@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "whatdeps"
-version = "0.1.0.post2"
+version = "0.1.1"
 description = "CLI tool to inspect Python package informations from PyPI and GitHub."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -42,6 +42,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/EmmanuelNiyonshuti/whatdeps"
+Changelog = "https://github.com/EmmanuelNiyonshuti/whatdeps/blob/main/CHANGELOG.md"
 Repository = "https://github.com/EmmanuelNiyonshuti/whatdeps"
 documentation = "https://github.com/EmmanuelNiyonshuti/whatdeps#readme"
 Issues = "https://github.com/EmmanuelNiyonshuti/whatdeps/issues"
