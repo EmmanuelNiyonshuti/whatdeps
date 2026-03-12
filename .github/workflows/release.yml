@@ -40,4 +40,4 @@ jobs:
             - name: Build
               run: uv build
             - name: Publish to PyPi
-              run: pypa/gh-action-pypi-publish@release/v1
+              uses: pypa/gh-action-pypi-publish@release/v1
