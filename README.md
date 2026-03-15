@@ -1,5 +1,5 @@
 # whatdeps
-[![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/test.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
+[![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/ci.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
 [![codecov](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps/graph/badge.svg?token=6HA3SJLM0F)](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps)
 [![PyPI](https://img.shields.io/pypi/v/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
