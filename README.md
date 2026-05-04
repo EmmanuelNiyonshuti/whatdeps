@@ -5,6 +5,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![](https://img.shields.io/github/license/EmmanuelNiyonshuti/whatdeps.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/blob/master/LICENSE.md)
 ![t](https://img.shields.io/badge/status-maintained-yellow.svg)
+[![Docs](https://img.shields.io/badge/docs-github%20pages-blue)](https://EmmanuelNiyonshuti.github.io/whatdeps/)
 
 A tiny CLI tool that shows basic information about a Python project’s dependencies using  few pieces of information from PyPI and GitHub.
 

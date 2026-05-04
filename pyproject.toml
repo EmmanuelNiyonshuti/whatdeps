@@ -36,7 +36,7 @@ dependencies = [
 Homepage = "https://github.com/EmmanuelNiyonshuti/whatdeps"
 Changelog = "https://github.com/EmmanuelNiyonshuti/whatdeps/blob/main/CHANGELOG.md"
 Repository = "https://github.com/EmmanuelNiyonshuti/whatdeps"
-documentation = "https://github.com/EmmanuelNiyonshuti/whatdeps#readme"
+documentation = "https://EmmanuelNiyonshuti.github.io/whatdeps/"
 Issues = "https://github.com/EmmanuelNiyonshuti/whatdeps/issues"
 
 [dependency-groups]
