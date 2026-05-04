@@ -14,18 +14,20 @@ jobs:
             contents: write # to push pages branch (peaceiris/actions-gh-pages)
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
 
-            - uses: actions/setup-python@v5
-              with:
-                python-version: "3.x"
-            
-            - name: Install dependencies
-              run: pip install sphinx
-            
+            - name: Install uv
+              uses: astral-sh/setup-uv@v7
+
+            - name: Install Python
+              run: uv python install 3.11
+
+            - name: Install tox
+              run: uv tool install tox --with tox-uv
+
             - name: Build documentation
               run: tox -e docs
-            
+
             - name: Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v4
               with:
