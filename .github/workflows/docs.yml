@@ -1,0 +1,36 @@
+name: Docs
+
+on:
+    push:
+        branches: [main]
+
+env:
+    FORCE_COLOR: 1 #output ANSI color code
+permissions: {}
+
+jobs:
+    docs:
+        permissions:
+            contents: write # to push pages branch (peaceiris/actions-gh-pages)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-python@v5
+              with:
+                python-version: "3.x"
+            
+            - name: Install dependencies
+              run: pip install sphinx
+            
+            - name: Build documentation
+              run: tox -e docs
+            
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                publish_dir: ./docs/_build/html
+                publish_branch: gh-pages
+                force_orphan: true # every deployment should wipe the branch history(gh-pages) and creates a new commit with the new content.
+

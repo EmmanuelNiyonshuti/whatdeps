@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Sphinx documentation (installation, usage, changelog).
+- Type hints throughout the codebase (`mypy` strict mode).
+- `tox` `docs` environment for building Sphinx documentation.
+
+### Changed
+- Ruff linting configuration extended with `bugbear`, `annotations`, `isort`, and `pyupgrade` rules.
+
 ## [0.1.1] - 2026-03-12
 
 ### Added

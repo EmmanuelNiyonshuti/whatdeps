@@ -1,14 +1,13 @@
 requires = ["tox>=4.23", "tox-uv>=1.0"]
 env_list = ["3.11", "3.12", "3.13", "3.14"]
+skip_missing_interpreters = true
 
 [env_run_base]
 description = "Run unit tests with pytest"
 runner = "uv-venv-lock-runner"
-extras = [
-    "dev"
-]
+dependency_groups = ["test"]
 commands = [
-    ["pytest", "--cov=whatdeps", "--cov-branch", "--cov-report=term-missing", "--cov-report=html", "tests/"]
+    ["pytest", "tests/"]
 ]
 
 [env.lint]
@@ -28,9 +27,12 @@ commands = [["ruff", "format", "src/"]]
 [env.coverage]
 description = "Generate coverage report"
 runner = "uv-venv-lock-runner"
-extras = [
-    "dev"
-]
+dependency_groups = ["test"]
 commands = [
     ["pytest", "--cov=whatdeps", "--cov-branch", "--cov-report=html", "--cov-report=term-missing", "tests/"]
 ]
+[env.docs]
+description = "Build documentation with Sphinx"
+runner = "uv-venv-runner"
+dependency_groups = ["doc"]
+commands = [["sphinx-build", "--nitpicky", "docs/", "docs/_build/html"]]
