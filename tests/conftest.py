@@ -1,14 +1,12 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 import pytest
 
-# @pytest.fixture
-# def fixtures_dir():
-#     return Path(__file__).parent / "fixtures"
-
 
 @pytest.fixture
-def sample_pyproject(tmp_path):
+def sample_pyproject(tmp_path: Path) -> Path:
     content = """
 [project]
 name = "test-project"
@@ -39,7 +37,7 @@ dependencies = [
 
 
 @pytest.fixture
-def sample_pyproject_poetry(tmp_path):
+def sample_pyproject_poetry(tmp_path: Path) -> Path:
     """Create a Poetry-style pyproject.toml"""
     content = """
 [tool.poetry]
@@ -62,7 +60,7 @@ pytest-cov = "^4.0"
 
 
 @pytest.fixture
-def sample_requirements(tmp_path):
+def sample_requirements(tmp_path: Path) -> Path:
     """Create a sample requirements.txt"""
     content = """# Production dependencies
 requests>=2.28.0
@@ -81,7 +79,7 @@ git+https://github.com/user/repo.git@main#egg=package
 
 
 @pytest.fixture
-def sample_requirements_dev(tmp_path):
+def sample_requirements_dev(tmp_path: Path) -> Path:
     """Create requirements-dev.txt"""
     content = """pytest>=7.0
 pytest-cov
@@ -94,7 +92,7 @@ ruff
 
 
 @pytest.fixture
-def mock_pypi_response():
+def mock_pypi_response() -> dict[str, Any]:
     return {
         "info": {
             "name": "requests",
@@ -126,7 +124,7 @@ def mock_pypi_response():
 
 
 @pytest.fixture
-def mock_pypi_response_no_github():
+def mock_pypi_response_no_github() -> dict[str, Any]:
     return {
         "info": {
             "name": "simple-package",
@@ -150,7 +148,7 @@ def mock_pypi_response_no_github():
 
 
 @pytest.fixture
-def mock_pypi_response_no_requires():
+def mock_pypi_response_no_requires() -> dict[str, Any]:
     return {
         "info": {
             "name": "legacy-package",
@@ -174,9 +172,9 @@ def mock_pypi_response_no_requires():
 
 
 @pytest.fixture
-def mock_github_response():
+def mock_github_response() -> dict[str, Any]:
     """Mock GitHub API response for active repository"""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return {
         "name": "requests",
         "full_name": "psf/requests",
@@ -193,9 +191,9 @@ def mock_github_response():
 
 
 @pytest.fixture
-def mock_github_response_archived():
+def mock_github_response_archived() -> dict[str, Any]:
     """Mock GitHub response for archived repository"""
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return {
         "name": "archived-project",
         "full_name": "user/archived-project",
@@ -212,7 +210,7 @@ def mock_github_response_archived():
 
 
 @pytest.fixture
-def mock_github_issues_search():
+def mock_github_issues_search() -> dict[str, int | bool]:
     """Mock GitHub issues search API response"""
     return {
         "total_count": 1200,

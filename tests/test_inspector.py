@@ -1,7 +1,10 @@
+from pathlib import Path
+from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
+from pytest import MonkeyPatch
 
 from whatdeps.inspector import PackageInspector
 from whatdeps.models import PackageInfo
@@ -10,11 +13,13 @@ from whatdeps.models import PackageInfo
 class TestPackageInspector:
     """Test PackageInspector class"""
 
-    def test_init(self):
+    def test_init(self) -> None:
         inspector = PackageInspector()
         assert hasattr(inspector, "venv_site_packages")
 
-    def test_find_site_packages_in_venv(self, tmp_path, monkeypatch):
+    def test_find_site_packages_in_venv(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test finding site-packages in virtual environment"""
         site_packages = tmp_path / "lib" / "python3.14" / "site-packages"
         site_packages.mkdir(parents=True)
@@ -25,7 +30,7 @@ class TestPackageInspector:
         inspector = PackageInspector()
         assert inspector.venv_site_packages == site_packages
 
-    def test_find_site_packages_not_in_venv(self, monkeypatch):
+    def test_find_site_packages_not_in_venv(self, monkeypatch: MonkeyPatch) -> None:
         """Test behavior when not in virtual environment"""
         # Mock sys.prefix == sys.base_prefix (not in venv)
         monkeypatch.setattr("sys.prefix", "/usr")
@@ -38,13 +43,15 @@ class TestPackageInspector:
 class TestGetGithubUrl:
     """Test GitHub URL extraction"""
 
-    def test_extract_github_url_from_source(self, mock_pypi_response):
+    def test_extract_github_url_from_source(
+        self, mock_pypi_response: dict[str, Any]
+    ) -> None:
         """Test extracting GitHub URL from Source link"""
         inspector = PackageInspector()
         url = inspector._get_github_url(mock_pypi_response)
         assert url == "https://github.com/psf/requests"
 
-    def test_extract_github_url_from_repository(self):
+    def test_extract_github_url_from_repository(self) -> None:
         """Test extracting from Repository link"""
         data = {
             "info": {"project_urls": {"Repository": "https://github.com/user/repo"}}
@@ -53,7 +60,7 @@ class TestGetGithubUrl:
         url = inspector._get_github_url(data)
         assert url == "https://github.com/user/repo"
 
-    def test_extract_github_url_case_insensitive(self):
+    def test_extract_github_url_case_insensitive(self) -> None:
         """Test case-insensitive label matching"""
         data = {
             "info": {"project_urls": {"SOURCE CODE": "https://github.com/user/repo"}}
@@ -62,20 +69,20 @@ class TestGetGithubUrl:
         url = inspector._get_github_url(data)
         assert url == "https://github.com/user/repo"
 
-    def test_no_github_url(self, mock_pypi_response_no_github):
+    def test_no_github_url(self, mock_pypi_response_no_github: dict[str, None]) -> None:
         """Test when no GitHub URL exists"""
         inspector = PackageInspector()
         url = inspector._get_github_url(mock_pypi_response_no_github)
         assert url is None
 
-    def test_no_project_urls(self):
+    def test_no_project_urls(self) -> None:
         """Test when project_urls is missing"""
         data = {"info": {}}
         inspector = PackageInspector()
         url = inspector._get_github_url(data)
         assert url is None
 
-    def test_strip_trailing_slash(self):
+    def test_strip_trailing_slash(self) -> None:
         """Test that trailing slashes are removed"""
         data = {"info": {"project_urls": {"Source": "https://github.com/user/repo/"}}}
         inspector = PackageInspector()
@@ -86,25 +93,25 @@ class TestGetGithubUrl:
 class TestParseGithubRepoPath:
     """Test GitHub repo path parsing"""
 
-    def test_parse_standard_url(self):
+    def test_parse_standard_url(self) -> None:
         """Test parsing standard GitHub URL"""
         inspector = PackageInspector()
         path = inspector._parse_github_repo_path("https://github.com/psf/requests")
         assert path == "psf/requests"
 
-    def test_parse_url_with_git_extension(self):
+    def test_parse_url_with_git_extension(self) -> None:
         """Test parsing URL with .git extension"""
         inspector = PackageInspector()
         path = inspector._parse_github_repo_path("https://github.com/user/repo.git")
         assert path == "user/repo"
 
-    def test_parse_url_with_trailing_slash(self):
+    def test_parse_url_with_trailing_slash(self) -> None:
         """Test parsing URL with trailing slash"""
         inspector = PackageInspector()
         path = inspector._parse_github_repo_path("https://github.com/user/repo/")
         assert path == "user/repo"
 
-    def test_parse_url_with_subpaths(self):
+    def test_parse_url_with_subpaths(self) -> None:
         """Test parsing URL with subpaths (tree/main, issues, etc.)"""
         inspector = PackageInspector()
 
@@ -116,13 +123,13 @@ class TestParseGithubRepoPath:
         path = inspector._parse_github_repo_path("https://github.com/user/repo/issues")
         assert path == "user/repo"
 
-    def test_parse_invalid_url(self):
+    def test_parse_invalid_url(self) -> None:
         """Test parsing invalid GitHub URL"""
         inspector = PackageInspector()
         path = inspector._parse_github_repo_path("https://example.com/not-github")
         assert path is None
 
-    def test_parse_url_without_repo(self):
+    def test_parse_url_without_repo(self) -> None:
         """Test parsing URL without repo path"""
         inspector = PackageInspector()
         path = inspector._parse_github_repo_path("https://github.com/")
@@ -133,33 +140,35 @@ class TestParseGithubRepoPath:
 class TestGetPythonRequires:
     """Test Python version requirement extraction"""
 
-    def test_extract_from_requires_python(self, mock_pypi_response):
+    def test_extract_from_requires_python(self, mock_pypi_response: Path) -> None:
         """Test extracting from requires_python field"""
         inspector = PackageInspector()
         req = inspector._get_python_requires(mock_pypi_response)
         assert req == ">=3.7"
 
-    def test_extract_complex_requirement(self):
+    def test_extract_complex_requirement(self) -> None:
         """Test extracting complex version requirement"""
         data = {"info": {"requires_python": ">=3.8,<4.0"}}
         inspector = PackageInspector()
         req = inspector._get_python_requires(data)
         assert req == ">=3.8,<4.0"
 
-    def test_fallback_to_classifiers(self, mock_pypi_response_no_requires):
+    def test_fallback_to_classifiers(
+        self, mock_pypi_response_no_requires: dict[str, Any]
+    ) -> None:
         """Test fallback to classifiers when requires_python missing"""
         inspector = PackageInspector()
         req = inspector._get_python_requires(mock_pypi_response_no_requires)
         assert req == ">=3.6"
 
-    def test_no_python_info(self):
+    def test_no_python_info(self) -> None:
         """Test when no Python version info available"""
         data = {"info": {"classifiers": []}}
         inspector = PackageInspector()
         req = inspector._get_python_requires(data)
         assert req is None
 
-    def test_whitespace_in_requires(self):
+    def test_whitespace_in_requires(self) -> None:
         """Test that whitespace is properly handled"""
         data = {"info": {"requires_python": "  >=3.9  "}}
         inspector = PackageInspector()
@@ -170,27 +179,27 @@ class TestGetPythonRequires:
 class TestGetLastReleaseDate:
     """Test release date extraction"""
 
-    def test_extract_release_date(self, mock_pypi_response):
+    def test_extract_release_date(self, mock_pypi_response: dict[str, Any]) -> None:
         """Test extracting release date from latest version"""
         inspector = PackageInspector()
         date = inspector._get_last_release_date(mock_pypi_response)
         assert date == "2023-05-22T14:30:00Z"
 
-    def test_no_releases(self):
+    def test_no_releases(self) -> None:
         """Test when no releases exist"""
         data = {"releases": {}}
         inspector = PackageInspector()
         date = inspector._get_last_release_date(data)
         assert date is None
 
-    def test_no_version_info(self):
+    def test_no_version_info(self) -> None:
         """Test when version info is missing"""
         data = {"info": {}, "releases": {"1.0.0": []}}
         inspector = PackageInspector()
         date = inspector._get_last_release_date(data)
         assert date is None
 
-    def test_version_not_in_releases(self):
+    def test_version_not_in_releases(self) -> None:
         """Test when listed version doesn't exist in releases"""
         data = {
             "info": {"version": "2.0.0"},
@@ -200,14 +209,14 @@ class TestGetLastReleaseDate:
         date = inspector._get_last_release_date(data)
         assert date is None
 
-    def test_empty_release_files(self):
+    def test_empty_release_files(self) -> None:
         """Test when release has no files"""
         data = {"info": {"version": "1.0.0"}, "releases": {"1.0.0": []}}
         inspector = PackageInspector()
         date = inspector._get_last_release_date(data)
         assert date is None
 
-    def test_fallback_to_upload_time(self):
+    def test_fallback_to_upload_time(self) -> None:
         """Test fallback to upload_time when iso_8601 missing"""
         data = {
             "info": {"version": "1.0.0"},
@@ -219,9 +228,9 @@ class TestGetLastReleaseDate:
 
 
 class TestFindFileSizes:
-    """Test disk size calculation"""
+    """Test packages size on disk"""
 
-    def test_find_sizes_no_venv(self):
+    def test_find_sizes_no_venv(self) -> None:
         """Test when not in virtual environment"""
         inspector = PackageInspector()
         inspector.venv_site_packages = None
@@ -229,7 +238,7 @@ class TestFindFileSizes:
         sizes = inspector.find_file_sizes_in_bytes("my-package")
         assert len(sizes) == 0
 
-    def test_find_sizes_single_file(self, tmp_path):
+    def test_find_sizes_single_file(self, tmp_path: Path) -> None:
         """Test finding single .py file"""
         inspector = PackageInspector()
         site_packages = tmp_path / "site-packages"
@@ -247,7 +256,7 @@ class TestFindFileSizes:
 class TestAsyncMethods:
     """Test async methods with mocked HTTP"""
 
-    async def test_fetch_json_success(self):
+    async def test_fetch_json_success(self) -> None:
         """Test successful JSON fetch"""
         inspector = PackageInspector()
 
@@ -260,7 +269,7 @@ class TestAsyncMethods:
         result = await inspector._fetch_json(mock_client, "https://example.com")
         assert result == {"key": "value"}
 
-    async def test_fetch_json_http_error(self):
+    async def test_fetch_json_http_error(self) -> None:
         inspector = PackageInspector()
 
         mock_client = AsyncMock()
@@ -269,7 +278,7 @@ class TestAsyncMethods:
         result = await inspector._fetch_json(mock_client, "https://example.com")
         assert result is None
 
-    async def test_fetch_json_invalid_json(self):
+    async def test_fetch_json_invalid_json(self) -> None:
         """Test handling invalid JSON"""
         inspector = PackageInspector()
 
@@ -283,15 +292,17 @@ class TestAsyncMethods:
         assert result is None
 
     async def test_get_github_metadata_success(
-        self, mock_github_response, mock_github_issues_search
-    ):
+        self,
+        mock_github_response: dict[str, Any],
+        mock_github_issues_search: dict[str, int | bool],
+    ) -> None:
         """Test successful GitHub metadata fetch"""
         inspector = PackageInspector()
 
         mock_client = AsyncMock()
         mock_client.get = AsyncMock()
 
-        async def mock_fetch(client, url):
+        async def mock_fetch(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
             if "search/issues" in url:
                 return mock_github_issues_search
             return mock_github_response
@@ -308,14 +319,16 @@ class TestAsyncMethods:
         assert result.is_archived is False
 
     async def test_get_github_metadata_archived(
-        self, mock_github_response_archived, mock_github_issues_search
-    ):
+        self,
+        mock_github_response_archived: dict[str, Any],
+        mock_github_issues_search: dict[str, int | bool],
+    ) -> None:
         """Test GitHub metadata for archived repo"""
         inspector = PackageInspector()
 
         mock_client = AsyncMock()
 
-        async def mock_fetch(client, url):
+        async def mock_fetch(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
             if "search/issues" in url:
                 return {"total_count": 0}
             return mock_github_response_archived
@@ -328,7 +341,7 @@ class TestAsyncMethods:
         assert result is not None
         assert result.is_archived is True
 
-    async def test_get_github_metadata_invalid_url(self):
+    async def test_get_github_metadata_invalid_url(self) -> None:
         """Test GitHub metadata with invalid URL"""
         inspector = PackageInspector()
 
@@ -338,7 +351,7 @@ class TestAsyncMethods:
 
         assert result is None
 
-    async def test_get_github_metadata_api_error(self):
+    async def test_get_github_metadata_api_error(self) -> None:
         """Test GitHub metadata when API returns error"""
         inspector = PackageInspector()
 
@@ -351,7 +364,7 @@ class TestAsyncMethods:
 
         assert result is None
 
-    async def test_inspect_package_not_found(self):
+    async def test_inspect_package_not_found(self) -> None:
         inspector = PackageInspector()
 
         mock_client = AsyncMock()
@@ -362,7 +375,7 @@ class TestAsyncMethods:
         assert result.error is not None
         assert result.name == "nonexistent-package"
 
-    async def test_inspect_invalid_pypi_response(self):
+    async def test_inspect_invalid_pypi_response(self) -> None:
         inspector = PackageInspector()
         mock_client = AsyncMock()
 
@@ -374,8 +387,11 @@ class TestAsyncMethods:
         assert result.error is not None
 
     async def test_inspect_full_success(
-        self, mock_pypi_response, mock_github_response, mock_github_issues_search
-    ):
+        self,
+        mock_pypi_response: dict[str, Any],
+        mock_github_response: dict[str, Any],
+        mock_github_issues_search: dict[str, int | bool],
+    ) -> None:
         """Test successful complete package inspection"""
         inspector = PackageInspector()
         inspector.venv_site_packages = None  # Skip disk size check
@@ -384,7 +400,7 @@ class TestAsyncMethods:
 
         call_count = 0
 
-        async def mock_fetch(client, url):
+        async def mock_fetch(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
             nonlocal call_count
             call_count += 1
             if "pypi.org" in url:
@@ -405,7 +421,9 @@ class TestAsyncMethods:
         assert result.github_metadata is not None
         assert result.is_dev_dependency is False
 
-    async def test_inspect_no_github(self, mock_pypi_response_no_github):
+    async def test_inspect_no_github(
+        self, mock_pypi_response_no_github: dict[str, Any]
+    ) -> None:
         """Test inspecting package without GitHub"""
         inspector = PackageInspector()
         inspector.venv_site_packages = None
@@ -421,7 +439,9 @@ class TestAsyncMethods:
         assert result.github_url is None
         assert result.github_metadata is None
 
-    async def test_inspect_dev_dependency(self, mock_pypi_response):
+    async def test_inspect_dev_dependency(
+        self, mock_pypi_response: dict[str, Any]
+    ) -> None:
         """Test marking as dev dependency"""
         inspector = PackageInspector()
         inspector.venv_site_packages = None
@@ -433,7 +453,9 @@ class TestAsyncMethods:
 
         assert result.is_dev_dependency is True
 
-    async def test_inspect_all_packages(self, mock_pypi_response):
+    async def test_inspect_all_packages(
+        self, mock_pypi_response: dict[str, Any]
+    ) -> None:
         """Test inspecting multiple packages concurrently"""
         inspector = PackageInspector()
         inspector.venv_site_packages = None

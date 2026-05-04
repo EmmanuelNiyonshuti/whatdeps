@@ -9,7 +9,7 @@ from whatdeps.models import Origin, PackageInfo
 class TestDisplayResultsComplete:
     """Complete tests for display_results function"""
 
-    def test_display_with_no_github(self):
+    def test_display_with_no_github(self) -> None:
         packages = [
             PackageInfo(
                 name="no-github-pkg",
@@ -27,7 +27,7 @@ class TestDisplayResultsComplete:
         result = output.getvalue()
         assert result is not None
 
-    def test_display_calculates_totals(self):
+    def test_display_calculates_totals(self) -> None:
         """Test that disk usage totals are calculated correctly"""
         packages = [
             PackageInfo(name="pkg1", disk_size=1024 * 1024, is_dev_dependency=False),
@@ -43,7 +43,7 @@ class TestDisplayResultsComplete:
         # Should show total disk usage
         assert "Total Disk Usage" in result
 
-    def test_display_separates_prod_and_dev(self):
+    def test_display_separates_prod_and_dev(self) -> None:
         """Test that production and dev packages are separated"""
         packages = [
             PackageInfo(name="prod1", is_dev_dependency=False),
@@ -59,7 +59,7 @@ class TestDisplayResultsComplete:
         result = output.getvalue()
         assert result is not None
 
-    def test_display_shows_legend(self):
+    def test_display_shows_legend(self) -> None:
         packages = [PackageInfo(name="test")]
 
         output = StringIO()
@@ -69,7 +69,7 @@ class TestDisplayResultsComplete:
         result = output.getvalue()
         assert "Summary" in result
 
-    def test_display_archived_repository(self):
+    def test_display_archived_repository(self) -> None:
         packages = [
             PackageInfo(
                 name="archived-pkg",
@@ -87,7 +87,7 @@ class TestDisplayResultsComplete:
         result = output.getvalue()
         assert "archived" in result
 
-    def test_display_handles_none_console(self):
+    def test_display_handles_none_console(self) -> None:
         """Test that function creates console if None provided"""
         packages = [PackageInfo(name="test")]
 
@@ -98,7 +98,7 @@ class TestDisplayResultsComplete:
 class TestTableSectionTotals:
     """Test that table section totals are calculated correctly"""
 
-    def test_section_total_calculation(self):
+    def test_section_total_calculation(self) -> None:
         """Test that section totals are shown in table"""
         packages = [
             PackageInfo(name="pkg1", disk_size=1024, is_dev_dependency=False),
@@ -110,7 +110,7 @@ class TestTableSectionTotals:
         # Table should have a section with totals
         assert table is not None
 
-    def test_section_total_with_none_sizes(self):
+    def test_section_total_with_none_sizes(self) -> None:
         """Test section totals with some None disk sizes"""
         packages = [
             PackageInfo(name="pkg1", disk_size=1024, is_dev_dependency=False),

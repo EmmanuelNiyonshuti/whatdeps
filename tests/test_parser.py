@@ -1,4 +1,8 @@
+import tomllib
+from pathlib import Path
+
 import pytest
+from pytest import MonkeyPatch
 
 from whatdeps import parser
 
@@ -6,12 +10,12 @@ from whatdeps import parser
 class TestGetPackageName:
     """Test package name extraction from various formats"""
 
-    def test_simple_package_name(self):
+    def test_simple_package_name(self) -> None:
         """Test extracting simple package name"""
         assert parser.get_package_name("requests") == "requests"
         assert parser.get_package_name("numpy") == "numpy"
 
-    def test_package_with_version_specifiers(self):
+    def test_package_with_version_specifiers(self) -> None:
         """Test all version specifier operators"""
         assert parser.get_package_name("requests>=2.28.0") == "requests"
         assert parser.get_package_name("numpy==1.24.0") == "numpy"
@@ -21,14 +25,14 @@ class TestGetPackageName:
         assert parser.get_package_name("click<=8.1.0") == "click"
         assert parser.get_package_name("pydantic!=2.0.0") == "pydantic"
 
-    def test_package_with_extras(self):
+    def test_package_with_extras(self) -> None:
         """Test package names with extras"""
         assert parser.get_package_name("click[shell]") == "click"
         assert parser.get_package_name("sqlalchemy[asyncio]") == "sqlalchemy"
         assert parser.get_package_name("requests[security,socks]") == "requests"
         assert parser.get_package_name("pip[testing]>=21.0") == "pip"
 
-    def test_package_with_environment_markers(self):
+    def test_package_with_environment_markers(self) -> None:
         """Test package names with environment markers"""
         assert (
             parser.get_package_name("typing-extensions>=4.0; python_version<'3.10'")
@@ -43,7 +47,7 @@ class TestGetPackageName:
             == "colorama"
         )
 
-    def test_package_with_complex_specifiers(self):
+    def test_package_with_complex_specifiers(self) -> None:
         """Test complex dependency specifications"""
         assert parser.get_package_name("django>=3.2,<5.0") == "django"
         assert (
@@ -51,13 +55,13 @@ class TestGetPackageName:
             == "requests"
         )
 
-    def test_package_with_whitespace(self):
+    def test_package_with_whitespace(self) -> None:
         """Test that whitespace is properly stripped"""
         assert parser.get_package_name("  requests  ") == "requests"
         assert parser.get_package_name("numpy >= 1.20.0") == "numpy"
         assert parser.get_package_name("  click[shell] >= 8.0  ") == "click"
 
-    def test_empty_or_invalid_input(self):
+    def test_empty_or_invalid_input(self) -> None:
         """Test edge cases with empty or minimal input"""
         assert parser.get_package_name("") == ""
         assert parser.get_package_name("   ") == ""
@@ -66,7 +70,7 @@ class TestGetPackageName:
 class TestParsePyproject:
     """Test pyproject.toml parsing"""
 
-    def test_parse_basic_pyproject(self, sample_pyproject):
+    def test_parse_basic_pyproject(self, sample_pyproject: Path) -> None:
         """Test parsing standard PEP 621 pyproject.toml"""
         prod, dev = parser.parse_pyproject(sample_pyproject)
 
@@ -82,7 +86,7 @@ class TestParsePyproject:
         assert "mkdocs" in dev
         assert "mkdocs-material" in dev
 
-    def test_parse_poetry_pyproject(self, sample_pyproject_poetry):
+    def test_parse_poetry_pyproject(self, sample_pyproject_poetry: Path) -> None:
         """Test parsing Poetry-style pyproject.toml"""
         prod, dev = parser.parse_pyproject(sample_pyproject_poetry)
 
@@ -93,7 +97,7 @@ class TestParsePyproject:
         assert "black" in dev
         assert "pytest-cov" in dev
 
-    def test_parse_empty_dependencies(self, tmp_path):
+    def test_parse_empty_dependencies(self, tmp_path: Path) -> None:
         """Test parsing pyproject.toml with no dependencies"""
         content = """
 [project]
@@ -106,7 +110,7 @@ name = "empty-project"
         assert prod == set()
         assert dev == set()
 
-    def test_parse_only_prod_dependencies(self, tmp_path):
+    def test_parse_only_prod_dependencies(self, tmp_path: Path) -> None:
         """Test parsing with only production dependencies"""
         content = """
 [project]
@@ -119,7 +123,7 @@ dependencies = ["requests", "numpy"]
         assert len(prod) == 2
         assert len(dev) == 0
 
-    def test_parse_only_dev_dependencies(self, tmp_path):
+    def test_parse_only_dev_dependencies(self, tmp_path: Path) -> None:
         """Test parsing with only dev dependencies"""
         content = """
 [project]
@@ -135,15 +139,15 @@ dev = ["pytest", "black"]
         assert len(prod) == 0
         assert len(dev) == 2
 
-    def test_parse_malformed_toml(self, tmp_path):
+    def test_parse_malformed_toml(self, tmp_path: Path) -> None:
         """Test handling of malformed TOML"""
         pyproject = tmp_path / "pyproject.toml"
         pyproject.write_text("this is not valid toml [[[")
 
-        with pytest.raises(Exception):  # tomllib.TOMLDecodeError
+        with pytest.raises(tomllib.TOMLDecodeError):
             parser.parse_pyproject(pyproject)
 
-    def test_parse_nonexistent_file(self, tmp_path):
+    def test_parse_nonexistent_file(self, tmp_path: Path) -> None:
         pyproject = tmp_path / "nonexistent.toml"
 
         with pytest.raises(AssertionError):
@@ -153,7 +157,7 @@ dev = ["pytest", "black"]
 class TestParseRequirements:
     """Test requirements.txt parsing"""
 
-    def test_parse_basic_requirements(self, sample_requirements):
+    def test_parse_basic_requirements(self, sample_requirements: Path) -> None:
         """Test parsing standard requirements.txt"""
         packages = parser.parse_requirements(sample_requirements)
 
@@ -164,7 +168,7 @@ class TestParseRequirements:
         # URL-based dependencies should be skipped or handled
         assert len(packages) >= 4
 
-    def test_parse_with_comments(self, tmp_path):
+    def test_parse_with_comments(self, tmp_path: Path) -> None:
         """Test that comments are properly ignored"""
         content = """# This is a comment
 requests>=2.0
@@ -180,7 +184,7 @@ flask
         assert len(packages) == 3
         assert "requests" in packages
 
-    def test_parse_with_empty_lines(self, tmp_path):
+    def test_parse_with_empty_lines(self, tmp_path: Path) -> None:
         """Test that empty lines are ignored"""
         content = """requests
 
@@ -195,7 +199,7 @@ flask
         packages = parser.parse_requirements(requirements)
         assert len(packages) == 3
 
-    def test_parse_with_editable_installs(self, tmp_path):
+    def test_parse_with_editable_installs(self, tmp_path: Path) -> None:
         """Test that -e flags are ignored"""
         content = """-e git+https://github.com/user/repo.git#egg=package
 requests
@@ -212,7 +216,7 @@ numpy
         # Editable installs should be skipped
         assert len(packages) == 2
 
-    def test_parse_with_flags(self, tmp_path):
+    def test_parse_with_flags(self, tmp_path: Path) -> None:
         """Test that pip flags are ignored"""
         content = """-r other-requirements.txt
 --index-url https://pypi.org/simple
@@ -228,14 +232,14 @@ numpy
         assert "requests" in packages
         assert "numpy" in packages
 
-    def test_parse_empty_file(self, tmp_path):
+    def test_parse_empty_file(self, tmp_path: Path) -> None:
         requirements = tmp_path / "requirements.txt"
         requirements.write_text("")
 
         packages = parser.parse_requirements(requirements)
         assert packages == set()
 
-    def test_parse_only_comments(self, tmp_path):
+    def test_parse_only_comments(self, tmp_path: Path) -> None:
         content = """# Comment 1
 # Comment 2
 ### Comment 3
@@ -250,7 +254,9 @@ numpy
 class TestFindAndParse:
     """Test auto-detection and parsing"""
 
-    def test_find_pyproject(self, sample_pyproject, monkeypatch):
+    def test_find_pyproject(
+        self, sample_pyproject: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test auto-detection of pyproject.toml"""
         monkeypatch.chdir(sample_pyproject.parent)
 
@@ -258,7 +264,9 @@ class TestFindAndParse:
         assert len(prod) > 0
         assert "requests" in prod
 
-    def test_find_requirements(self, sample_requirements, monkeypatch):
+    def test_find_requirements(
+        self, sample_requirements: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test auto-detection of requirements.txt"""
         monkeypatch.chdir(sample_requirements.parent)
 
@@ -268,8 +276,11 @@ class TestFindAndParse:
         assert len(dev) == 0  # No dev deps in requirements.txt alone
 
     def test_find_requirements_with_dev(
-        self, sample_requirements, sample_requirements_dev, monkeypatch
-    ):
+        self,
+        sample_requirements: Path,
+        sample_requirements_dev: Path,
+        monkeypatch: MonkeyPatch,
+    ) -> None:
         """Test auto-detection of requirements.txt with dev dependencies"""
         monkeypatch.chdir(sample_requirements.parent)
 
@@ -279,8 +290,11 @@ class TestFindAndParse:
         assert "pytest" in dev
 
     def test_priority_pyproject_over_requirements(
-        self, sample_pyproject, sample_requirements, monkeypatch
-    ):
+        self,
+        sample_pyproject: Path,
+        sample_requirements: Path,
+        monkeypatch: MonkeyPatch,
+    ) -> None:
         """Test that pyproject.toml takes priority"""
         # Both files in same directory
         monkeypatch.chdir(sample_pyproject.parent)
@@ -290,13 +304,17 @@ class TestFindAndParse:
         # Should parse pyproject.toml, not requirements.txt
         assert "numpy" in prod
 
-    def test_find_parse_dependency_file_not_found(self, tmp_path, monkeypatch):
+    def test_find_parse_dependency_file_not_found(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         monkeypatch.chdir(tmp_path)
 
         with pytest.raises(FileNotFoundError):
             parser.find_and_parse()
 
-    def test_find_multiple_dev_requirement_patterns(self, tmp_path, monkeypatch):
+    def test_find_multiple_dev_requirement_patterns(
+        self, tmp_path: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         """Test finding multiple dev requirement file patterns"""
         monkeypatch.chdir(tmp_path)
 

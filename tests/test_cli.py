@@ -1,23 +1,30 @@
 import asyncio
 import sys
+from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from pytest import CaptureFixture, MonkeyPatch
 
 from whatdeps import cli
 from whatdeps.models import PackageInfo
-from whatdeps.utils import _inspect_packages, _scan_dependencies, parse_dependency_files
+from whatdeps.utils import (
+    _inspect_packages,
+    _scan_dependencies,
+    parse_dependency_files,
+    run,
+)
 
 
 class TestParseDependencyFiles:
-    def test_file_not_found(self, tmp_path):
+    def test_file_not_found(self, tmp_path: Path) -> None:
         args = Mock()
         args.file = str(tmp_path / "nonexistent.txt")
 
         with pytest.raises(FileNotFoundError):
             parse_dependency_files(args)
 
-    def test_invalid_file_type(self, tmp_path):
+    def test_invalid_file_type(self, tmp_path: Path) -> None:
         bad = tmp_path / "random.txt"
         bad.write_text("content")
         args = Mock()
@@ -26,7 +33,7 @@ class TestParseDependencyFiles:
         with pytest.raises(ValueError):
             parse_dependency_files(args)
 
-    def test_parses_pyproject(self, sample_pyproject):
+    def test_parses_pyproject(self, sample_pyproject: Path) -> None:
         args = Mock()
         args.file = str(sample_pyproject)
 
@@ -36,7 +43,7 @@ class TestParseDependencyFiles:
         assert isinstance(other_deps, set)
         assert len(prod_deps) > 0
 
-    def test_parses_requirements(self, sample_requirements):
+    def test_parses_requirements(self, sample_requirements: Path) -> None:
         args = Mock()
         args.file = str(sample_requirements)
 
@@ -45,7 +52,9 @@ class TestParseDependencyFiles:
         assert isinstance(prod_deps, set)
         assert other_deps == {}
 
-    def test_auto_detect_when_no_file(self, sample_pyproject, monkeypatch):
+    def test_auto_detect_when_no_file(
+        self, sample_pyproject: Path, monkeypatch: MonkeyPatch
+    ) -> None:
         monkeypatch.chdir(sample_pyproject.parent)
         args = Mock()
         args.file = None
@@ -56,7 +65,7 @@ class TestParseDependencyFiles:
 
 
 class TestScanDependencies:
-    def test_returns_deps_and_total(self, sample_pyproject):
+    def test_returns_deps_and_total(self, sample_pyproject: Path) -> None:
         args = Mock()
         args.file = str(sample_pyproject)
 
@@ -64,14 +73,14 @@ class TestScanDependencies:
 
         assert total == len(prod_deps) + len(other_deps)
 
-    def test_propagates_file_not_found(self, tmp_path):
+    def test_propagates_file_not_found(self, tmp_path: Path) -> None:
         args = Mock()
         args.file = str(tmp_path / "ghost.txt")
 
         with pytest.raises(FileNotFoundError):
             _scan_dependencies(args)
 
-    def test_propagates_value_error(self, tmp_path):
+    def test_propagates_value_error(self, tmp_path: Path) -> None:
         bad = tmp_path / "bad.txt"
         bad.write_text("x")
         args = Mock()
@@ -82,7 +91,7 @@ class TestScanDependencies:
 
 
 class TestInspectPackages:
-    def test_returns_sorted_results(self):
+    def test_returns_sorted_results(self) -> None:
         mock_results = [
             PackageInfo(name="requests", is_dev_dependency=False),
             PackageInfo(name="pytest", is_dev_dependency=True),
@@ -96,7 +105,7 @@ class TestInspectPackages:
         assert results == mock_results
         mock_inspector.inspect_all.assert_called_once()
 
-    def test_empty_deps(self):
+    def test_empty_deps(self) -> None:
         mock_inspector = Mock()
         mock_inspector.inspect_all = AsyncMock(return_value=[])
 
@@ -105,7 +114,7 @@ class TestInspectPackages:
 
         assert results == []
 
-    def test_passes_progress_and_task_to_inspector(self):
+    def test_passes_progress_and_task_to_inspector(self) -> None:
         mock_inspector = Mock()
         mock_inspector.inspect_all = AsyncMock(return_value=[])
 
@@ -120,18 +129,17 @@ class TestInspectPackages:
 
 
 class TestRun:
-    def test_exits_early_on_empty_deps(self, capsys):
-        with patch("whatdeps.utils._scan_dependencies", return_value=(set(), set(), 0)):
-            from whatdeps.utils import run
-
+    def test_exits_early_on_empty_deps(self, capsys: CaptureFixture[str]) -> None:
+        with (
+            patch("whatdeps.utils._scan_dependencies", return_value=(set(), set(), 0)),
+            patch("whatdeps.utils._inspect_packages") as mock_inspect,
+        ):
             run(Mock())
+            out, err = capsys.readouterr()
+            assert "Couldn't find dependencies" in out
+            mock_inspect.assert_not_called()
 
-        # _inspect_packages should never be reached
-        # capsys or just asserting no error is sufficient here
-
-    def test_full_flow(self, sample_pyproject):
-        from whatdeps.utils import run
-
+    def test_full_flow(self, sample_pyproject: Path) -> None:
         mock_results = [PackageInfo(name="requests", is_dev_dependency=False)]
         mock_inspector = Mock()
         mock_inspector.inspect_all = AsyncMock(return_value=mock_results)
@@ -147,7 +155,7 @@ class TestRun:
         displayed_results = mock_display.call_args[0][0]
         assert displayed_results == mock_results
 
-    def test_results_are_sorted(self, sample_pyproject):
+    def test_results_are_sorted(self, sample_pyproject: Path) -> None:
         from whatdeps.utils import run
 
         mock_results = [
@@ -171,7 +179,7 @@ class TestRun:
 
 
 class TestMain:
-    def test_success(self, sample_pyproject, monkeypatch):
+    def test_success(self, sample_pyproject: Path, monkeypatch: MonkeyPatch) -> None:
         monkeypatch.chdir(sample_pyproject.parent)
 
         with patch.object(sys, "argv", ["prog"]):
@@ -180,7 +188,7 @@ class TestMain:
 
         mock_run.assert_called_once()
 
-    def test_file_argument_passed_through(self, sample_pyproject):
+    def test_file_argument_passed_through(self, sample_pyproject: Path) -> None:
         with patch.object(sys, "argv", ["prog", "-f", str(sample_pyproject)]):
             with patch("whatdeps.cli.run") as mock_run:
                 cli.main()
@@ -188,7 +196,7 @@ class TestMain:
         call_args = mock_run.call_args[0][0]
         assert call_args.file == str(sample_pyproject)
 
-    def test_file_not_found_exits_1(self):
+    def test_file_not_found_exits_1(self) -> None:
         with patch.object(sys, "argv", ["prog"]):
             with patch("whatdeps.cli.run", side_effect=FileNotFoundError("missing")):
                 with pytest.raises(SystemExit) as exc:
@@ -196,7 +204,7 @@ class TestMain:
 
         assert exc.value.code == 1
 
-    def test_value_error_exits_1(self, tmp_path):
+    def test_value_error_exits_1(self, tmp_path: Path) -> None:
         bad = tmp_path / "bad.txt"
         bad.write_text("x")
 
@@ -207,7 +215,7 @@ class TestMain:
 
         assert exc.value.code == 1
 
-    def test_keyboard_interrupt_exits_130(self):
+    def test_keyboard_interrupt_exits_130(self) -> None:
         with patch.object(sys, "argv", ["prog"]):
             with patch("whatdeps.cli.run", side_effect=KeyboardInterrupt()):
                 with pytest.raises(SystemExit) as exc:
@@ -215,7 +223,7 @@ class TestMain:
 
         assert exc.value.code == 130
 
-    def test_unexpected_error_exits_1(self):
+    def test_unexpected_error_exits_1(self) -> None:
         with patch.object(sys, "argv", ["prog"]):
             with patch("whatdeps.cli.run", side_effect=Exception("boom")):
                 with pytest.raises(SystemExit) as exc:
@@ -223,7 +231,7 @@ class TestMain:
 
         assert exc.value.code == 1
 
-    def test_argument_parser_has_description(self):
+    def test_argument_parser_has_description(self) -> None:
         with patch("whatdeps.cli.argparse.ArgumentParser") as mock_parser_class:
             mock_parser = Mock()
             mock_parser.parse_args.return_value = Mock(file=None)
