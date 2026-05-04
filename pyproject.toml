@@ -53,6 +53,24 @@ whatdeps = "whatdeps.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/whatdeps"]
 
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+extend-select = [
+    "B", #flake8-bugbear
+    "ANN", #flake8-annotations
+    "I", # isort
+    "W", # pycodestyle
+    "UP" #pyupgrades
+] 
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = false
+files = ["src", "tests"]
+
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
