@@ -6,7 +6,7 @@ from .console import console
 from .utils import run
 
 
-def main():
+def main() -> None:
     parser_obj = argparse.ArgumentParser(
         description="Get to know about your Python project dependency informations from PyPi and GitHub",
         formatter_class=argparse.RawDescriptionHelpFormatter,
