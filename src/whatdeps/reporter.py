@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from rich import box
 from rich.console import Console
@@ -37,7 +37,7 @@ def days_since(date_str: str | None) -> int | None:
         return None
     try:
         date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         return (now - date).days
     except (ValueError, AttributeError):
         return None

@@ -32,7 +32,7 @@ def parse_pyproject(path: Path) -> tuple[set[str], set[str]]:
     #  dependency-groups (PEP 735)
     dev_packages = set()
     dep_groups = data.get("dependency-groups", {})
-    for group_name, deps in dep_groups.items():
+    for _, deps in dep_groups.items():
         dev_packages.update([get_package_name(dep) for dep in deps])
 
     # check tool.hatch.envs.*.dependencies

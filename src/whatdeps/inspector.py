@@ -1,6 +1,8 @@
 import asyncio
 import sys
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 import httpx
 import orjson
@@ -10,10 +12,10 @@ from .models import Origin, PackageInfo
 
 
 class PackageInspector:
-    PYPI_API = "https://pypi.org/pypi/{}/json"
-    GITHUB_API = "https://api.github.com/repos/{}"
+    PYPI_API: str = "https://pypi.org/pypi/{}/json"
+    GITHUB_API: str = "https://api.github.com/repos/{}"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.venv_site_packages = self._find_site_packages()
 
     @staticmethod
@@ -26,7 +28,9 @@ class PackageInspector:
             return path
         return None
 
-    async def _fetch_json(self, client: httpx.AsyncClient, url: str) -> dict | None:
+    async def _fetch_json(
+        self, client: httpx.AsyncClient, url: str
+    ) -> dict[str, Any] | None:
         try:
             response = await client.get(url)
             response.raise_for_status()
@@ -34,7 +38,7 @@ class PackageInspector:
         except (httpx.HTTPError, orjson.JSONDecodeError):
             return None
 
-    def _get_github_url(self, pypi_data: dict) -> str | None:
+    def _get_github_url(self, pypi_data: Mapping[str, Any]) -> str | None:
         pypi_info = pypi_data.get("info", {})
         home_page_url = pypi_info.get("home_page")
         if home_page_url and "github.com" in home_page_url:
@@ -169,7 +173,7 @@ class PackageInspector:
 
         pypi_data = await self._fetch_json(client, self.PYPI_API.format(package_name))
         if not pypi_data:
-            info.error = f"I couldn't find {package_name} package on PyPI"
+            info.error = f"Couldn't find {package_name} package on PyPI"
             return info
 
         pypi_info = pypi_data.get("info", {})
@@ -197,7 +201,10 @@ class PackageInspector:
         return info
 
     async def inspect_all(
-        self, packages: list[tuple[str, bool]], progress: Progress = None, task_id=None
+        self,
+        packages: list[tuple[str, bool]],
+        progress: Progress = None,
+        task_id: int = None,
     ) -> list[PackageInfo]:
         results = []
         async with httpx.AsyncClient(

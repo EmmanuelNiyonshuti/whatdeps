@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 from pathlib import Path
-from typing import List, Set, Tuple
 
 from rich.progress import (
     BarColumn,
@@ -32,10 +31,10 @@ def is_valid_dependency_file(path: Path) -> bool:
     return path.name in REQUIREMENTS_FILES
 
 
-from . import parser, reporter  # noqa
+from . import parser, reporter  # noqa: E402
 
 
-def parse_dependency_files(args: argparse.Namespace) -> Tuple[Set[str], Set[str]]:
+def parse_dependency_files(args: argparse.Namespace) -> tuple[set[str], set[str]]:
     if args.file:
         file_path = Path(args.file)
         if not file_path.exists():
@@ -55,7 +54,7 @@ def parse_dependency_files(args: argparse.Namespace) -> Tuple[Set[str], Set[str]
     return prod_deps, other_deps
 
 
-def _scan_dependencies(args: argparse.Namespace) -> Tuple[Set[str], Set[str], int]:
+def _scan_dependencies(args: argparse.Namespace) -> tuple[set[str], set[str], int]:
     """Parse dependency files under status spinner"""
     with console.status("[bold green]Scanning dependency files..."):
         prod_deps, other_deps = parse_dependency_files(args)
@@ -63,7 +62,7 @@ def _scan_dependencies(args: argparse.Namespace) -> Tuple[Set[str], Set[str], in
         return prod_deps, other_deps, len(prod_deps) + len(other_deps)
 
 
-def _print_summary(prod_deps: Set, other_deps: Set, total: int) -> None:
+def _print_summary(prod_deps: set, other_deps: set, total: int) -> None:
     """
     Print human readable summary line
     """
@@ -73,7 +72,7 @@ def _print_summary(prod_deps: Set, other_deps: Set, total: int) -> None:
     )
 
 
-async def _inspect_packages(prod_deps: set, other_deps: set, total: int) -> List:
+async def _inspect_packages(prod_deps: set, other_deps: set, total: int) -> list:
     """
     Fetch GitHub/PyPi metadata under a progress bar.
     """
