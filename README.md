@@ -18,7 +18,7 @@ A tiny CLI tool that shows basic information about a Python project’s dependen
 - **Issues** - open/closed ratio (to give a sense of maintenance)
 - **Stars** - popularity on GitHub
 
-## Installtion
+## Installation
 
 You can install it as a commandline tool with pipx or uv tool
 ```bash
@@ -80,3 +80,26 @@ whatdeps -f pyproject.toml
 Dependencies are parsed according to [PEP 508](https://peps.python.org/pep-0508/). Development dependencies follow [PEP 735](https://peps.python.org/pep-0735/) groupings.
 
 Packages in `requirements.txt` are treated as production dependencies; those from other pip requirements files are considered as other dependencies.
+
+## Local development
+ 
+this project uses [tox](https://tox.wiki/en/4.17.2/installation.html) for testing and documentation building, [sphinx](https://www.sphinx-doc.org/en/master/) for docs, and [pytest](https://docs.pytest.org/en/stable/) for tests.
+ 
+build the docs:
+```bash
+tox -e docs
+```
+output goes to `docs/_build`.
+ 
+run tests on a specific Python version:
+```bash
+tox -e py3.x -- tests
+```
+run tests across all environments in parallel:
+```bash
+tox -p -- tests
+```
+you can also use `uv` to create a virtual environment and sync dependencies:
+```bash
+uv sync
+```
