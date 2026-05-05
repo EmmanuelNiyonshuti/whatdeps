@@ -10,6 +10,7 @@ from rich.progress import (
     TextColumn,
 )
 
+from . import parser, reporter
 from .console import console
 from .inspector import PackageInspector
 
@@ -29,9 +30,6 @@ def is_valid_dependency_file(path: Path) -> bool:
         return True
 
     return path.name in REQUIREMENTS_FILES
-
-
-from . import parser, reporter  # noqa: E402
 
 
 def parse_dependency_files(args: argparse.Namespace) -> tuple[set[str], set[str]]:

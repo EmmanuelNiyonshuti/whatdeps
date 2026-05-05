@@ -1,7 +1,7 @@
 import tomllib
 from pathlib import Path
 
-from .utils import REQUIREMENTS_FILES, is_valid_dependency_file
+from . import utils
 
 
 def get_package_name(dep_spec: str) -> str:
@@ -21,7 +21,7 @@ def get_package_name(dep_spec: str) -> str:
 
 
 def parse_pyproject(path: Path) -> tuple[set[str], set[str]]:
-    assert is_valid_dependency_file(path), "invalid dependency specification file"
+    assert utils.is_valid_dependency_file(path), "invalid dependency specification file"
     with open(path, "rb") as f:
         data = tomllib.load(f)
     dev_packages, prod_packages = set(), set()
@@ -64,7 +64,7 @@ def parse_pyproject(path: Path) -> tuple[set[str], set[str]]:
 
 
 def parse_requirements(path: Path) -> set[str]:
-    assert is_valid_dependency_file(path), "invalid dependency specification file"
+    assert utils.is_valid_dependency_file(path), "invalid dependency specification file"
     packages = set()
     with open(path) as f:
         for line in f:
@@ -95,7 +95,7 @@ def find_and_parse() -> tuple[set[str], set[str]]:
         other_deps.update(parse_requirements(requirements_dev))
 
     # some other requirements files
-    for pattern in REQUIREMENTS_FILES:
+    for pattern in utils.REQUIREMENTS_FILES:
         other_file = Path(pattern)
         if other_file.exists():
             other_deps.update(parse_requirements(other_file))
