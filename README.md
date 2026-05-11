@@ -20,18 +20,21 @@ A tiny CLI tool that shows basic information about a Python project’s dependen
 
 ## Installation
 
-You can install it as a commandline tool with pipx or uv tool
+You can install it from [PyPI](https://pypi.org/project/whatdeps/)
 ```bash
+# With uv
 uv tool install whatdeps
 
+# or pipx
 pipx install whatdeps
 ```
 or
-
-You can install it in your project environment with pip or uv
+You can install it in your project environment(not recommended!)
 ```bash
+# With pip
 pip install whatdeps
 
+# Or uv
 uv add whatdeps
 ```
 
