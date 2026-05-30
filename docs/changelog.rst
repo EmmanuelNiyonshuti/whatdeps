@@ -6,7 +6,18 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ----------
 
-`Compare unreleased changes <https://github.com/EmmanuelNiyonshuti/whatdeps/compare/v0.1.1...HEAD>`_
+`Compare unreleased changes <https://github.com/EmmanuelNiyonshuti/whatdeps/compare/v0.1.2...HEAD>`_
+
+0.1.2 - 2026-05-30
+------------------
+
+Changed
+~~~~~~~
+
+- Improved type annotations across the codebase.
+- Added Sphinx documentation.
+
+`Full diff <https://github.com/EmmanuelNiyonshuti/whatdeps/compare/v0.1.1...v0.1.2>`_
 
 0.1.1 — 2026-03-12
 -------------------
