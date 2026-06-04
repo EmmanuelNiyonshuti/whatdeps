@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps/graph/badge.svg?token=6HA3SJLM0F)](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps)
 [![PyPI](https://img.shields.io/pypi/v/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
-[![](https://img.shields.io/github/license/EmmanuelNiyonshuti/whatdeps.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/blob/master/LICENSE.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 ![t](https://img.shields.io/badge/status-maintained-yellow.svg)
 [![Docs](https://img.shields.io/badge/docs-github%20pages-blue)](https://EmmanuelNiyonshuti.github.io/whatdeps/)
 
