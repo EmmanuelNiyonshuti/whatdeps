@@ -106,3 +106,6 @@ you can also use `uv` to create a virtual environment and sync dependencies:
 ```bash
 uv sync
 ```
+
+## LICENCE
+MIT. See the `LICENSE` file for details.
