@@ -1,11 +1,10 @@
 # whatdeps
-
 [![Tests](https://github.com/EmmanuelNiyonshuti/whatdeps/actions/workflows/ci.yml/badge.svg)](https://github.com/EmmanuelNiyonshuti/whatdeps/actions)
 [![codecov](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps/graph/badge.svg?token=6HA3SJLM0F)](https://codecov.io/gh/EmmanuelNiyonshuti/whatdeps)
 [![PyPI](https://img.shields.io/pypi/v/whatdeps.svg)](https://pypi.org/project/whatdeps/)
 [![Python](https://img.shields.io/pypi/pyversions/whatdeps.svg)](https://pypi.org/project/whatdeps/)
-[![License](https://img.shields.io/github/license/EmmanuelNiyonshuti/whatdeps?label=license)](https://github.com/EmmanuelNiyonshuti/whatdeps/blob/main/LICENSE)
-![Status](https://img.shields.io/badge/status-maintained-yellow.svg)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+![t](https://img.shields.io/badge/status-maintained-yellow.svg)
 [![Docs](https://img.shields.io/badge/docs-github%20pages-blue)](https://EmmanuelNiyonshuti.github.io/whatdeps/)
 
 A tiny CLI tool that shows basic information about a Python project’s dependencies using  few pieces of information from PyPI and GitHub.
@@ -107,3 +106,6 @@ you can also use `uv` to create a virtual environment and sync dependencies:
 ```bash
 uv sync
 ```
+
+## LICENCE
+MIT. See the `LICENSE` file for details.
